@@ -11,8 +11,11 @@
     "postinstall": "patch-package"
   },
   "dependencies": {
+    "pod-install": "^0.1.38",
     "react": "17.0.2",
-    "react-native": "0.68.2"
+    "react-native": "0.68.2",
+    "react-native-pod": "^1.12.1",
+    "react-native-vosk": "^0.1.8"
   },
   "devDependencies": {
     "@babel/core": "^7.12.10",
