@@ -3,9 +3,11 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, Button } from 'react-native';
 import Vosk from 'react-native-vosk';
 
+const DIALOGUE_BUFFER = 5;
+
 export default function App() {
   const [ready, setReady] = useState<Boolean>(true);
-  const [result, setResult] = useState<String | undefined>();
+  const [result, setResult] = useState<Array<String> | undefined>();
 
   const vosk = new Vosk();
 
@@ -36,7 +38,13 @@ export default function App() {
       .start(grammar)
       .then((res: any) => {
         console.log('Result is: ' + res);
-        setResult(result => result == undefined ? res : result + " " + res);
+        setResult(old => old != null ? 
+          (old.length > DIALOGUE_BUFFER ? 
+            old.slice(1).concat([res]) : 
+            old.concat([res])
+            ) : 
+          [res]);
+          console.log("T")
         record();
       })
       .catch((e: any) => {
@@ -56,7 +64,9 @@ export default function App() {
         color="#841584"
       />
       <Text>Recognized word:</Text>
-      <Text>{result}</Text>
+      <Text>{result == undefined ? "placeholder" : result.map((result) =>
+        <Text>{result == "" ? "\n" : "Stir: " +result+"\n"}</Text>
+      )}</Text>
     </View>
   );
 }

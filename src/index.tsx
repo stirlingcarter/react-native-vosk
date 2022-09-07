@@ -55,6 +55,7 @@ export default class Vosk {
 
           // Start recognition
           VoskModule.start([]);
+          
         })
         .catch((e) => {
           reject(e);
@@ -63,6 +64,8 @@ export default class Vosk {
       this.cleanListeners();
     });
   };
+
+  
 
   stop = () => {
     this.cleanListeners();

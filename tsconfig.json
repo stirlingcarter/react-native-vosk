@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    
     "baseUrl": "./",
     "paths": {
       "react-native-vosk": ["./src/index"]
@@ -10,7 +11,9 @@
     "importsNotUsedAsValues": "error",
     "forceConsistentCasingInFileNames": true,
     "jsx": "react",
-    "lib": ["esnext"],
+    "lib": [
+      "esnext", "es5", "es6", "dom", "dom.iterable"
+      ],
     "module": "esnext",
     "moduleResolution": "node",
     "noFallthroughCasesInSwitch": true,

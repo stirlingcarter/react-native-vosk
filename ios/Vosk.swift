@@ -119,12 +119,14 @@ class Vosk: RCTEventEmitter {
                 guard success, let self = self else { return }
                 try? self.audioEngine.start()
             }
-            
+
             // and manage timeout
             timeoutTimer = Timer.scheduledTimer(withTimeInterval: 10, repeats: false) {_ in
                 self.sendEvent(withName: "onTimeout", body: ["data": ""])
                 self.stopInternal(withoutEvents: true)
             }
+
+            
 
         } catch {
             if (hasListener) {
@@ -171,5 +173,10 @@ class Vosk: RCTEventEmitter {
             }
             let res = endOfSpeech == 1 ? vosk_recognizer_result(recognizer) : vosk_recognizer_partial_result(recognizer)
             return (String(validatingUTF8: res!), endOfSpeech == 1);
+    }
+    
+    @objc func run(_ timer: AnyObject) {
+          print("Do your remaining stuff here...")
+
     }
 }
