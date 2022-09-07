@@ -70,6 +70,7 @@ class Vosk: RCTEventEmitter {
             currentModel = nil; // deinit model
         }
         currentModel = VoskModel(name: name)
+
         resolve(name)
     }
     
@@ -86,7 +87,9 @@ class Vosk: RCTEventEmitter {
                 let jsonGrammar = try! JSONEncoder().encode(grammar)
                 recognizer = vosk_recognizer_new_grm(currentModel!.model, Float(formatInput.sampleRate), String(data: jsonGrammar, encoding: .utf8))
             } else {
-                recognizer = vosk_recognizer_new_spk(currentModel!.model, Float(formatInput.sampleRate), currentModel!.spkModel)
+                recognizer = vosk_recognizer_new(currentModel!.model, Float(formatInput.sampleRate))
+
+//                recognizer = vosk_recognizer_new_spk(currentModel!.model, Float(formatInput.sampleRate), currentModel!.spkModel)
             }
             
             let formatPcm = AVAudioFormat.init(commonFormat: AVAudioCommonFormat.pcmFormatInt16, sampleRate: formatInput.sampleRate, channels: 1, interleaved: true)
@@ -122,6 +125,7 @@ class Vosk: RCTEventEmitter {
                 self.sendEvent(withName: "onTimeout", body: ["data": ""])
                 self.stopInternal(withoutEvents: true)
             }
+
         } catch {
             if (hasListener) {
                 sendEvent(withName: "onError", body: ["data": "Unable to start AVAudioEngine " + error.localizedDescription])

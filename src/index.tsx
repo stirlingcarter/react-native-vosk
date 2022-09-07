@@ -54,7 +54,7 @@ export default class Vosk {
           this.currentRegisteredEvents.push(eventEmitter.addListener('onTimeout', () => reject('timeout')));
 
           // Start recognition
-          VoskModule.start(grammar);
+          VoskModule.start([]);
         })
         .catch((e) => {
           reject(e);

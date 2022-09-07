@@ -11,13 +11,13 @@ export default function App() {
 
   useEffect(() => {
     vosk
-      .loadModel('model-fr-fr')
-      // .loadModel('model-en-us')
+      // .loadModel('model-fr-fr')
+      .loadModel('models/en')
       .then(() => setReady(true))
       .catch((e: any) => console.log(e));
 
     const resultEvent = vosk.onResult((res) => {
-      console.log('A onResult event has been caught: ' + res.data);
+      console.log('A onResult event has been caught :o ' + res.data);
     });
 
     return () => {
@@ -26,7 +26,6 @@ export default function App() {
   }, []);
 
   const grammar = ['gauche', 'droite', '[unk]'];
-  // const grammar = ['left', 'right', '[unk]'];
 
   const record = () => {
     console.log('Starting recognition...');
@@ -37,7 +36,8 @@ export default function App() {
       .start(grammar)
       .then((res: any) => {
         console.log('Result is: ' + res);
-        setResult(res);
+        setResult(result => result == undefined ? res : result + " " + res);
+        record();
       })
       .catch((e: any) => {
         console.log('Error: ' + e);
