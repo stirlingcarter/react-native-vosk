@@ -28,7 +28,7 @@ class Vosk: RCTEventEmitter {
     var lastRecognizedResult: VoskResult?
     /// The timeout timer ref
     var timeoutTimer: Timer?
-    
+    var bus: Int = 0
     /// React member: has any JS event listener
     var hasListener: Bool = false
     
@@ -37,10 +37,17 @@ class Vosk: RCTEventEmitter {
         super.init()
         // Init the processing queue
         processingQueue = DispatchQueue(label: "recognizerQueue")
+        
+
+    }
+    
+    @objc(withBus:)
+    func withBus(bus: Int) -> Void {
         // Create a new audio engine.
         inputNode = audioEngine.inputNode
+        self.bus = bus;
         // Get the microphone default input format
-        formatInput = inputNode.inputFormat(forBus: 0)
+        formatInput = inputNode.inputFormat(forBus: self.bus)
     }
     
     deinit {
@@ -78,7 +85,7 @@ class Vosk: RCTEventEmitter {
     @objc(start:)
     func start(grammar: [String]?) -> Void {
         let audioSession = AVAudioSession.sharedInstance()
-        
+        print(self.bus)
         do {
             // Ask the user for permission to use the mic if required then start the engine.
             try audioSession.setCategory(.record)
@@ -94,7 +101,7 @@ class Vosk: RCTEventEmitter {
             
             let formatPcm = AVAudioFormat.init(commonFormat: AVAudioCommonFormat.pcmFormatInt16, sampleRate: formatInput.sampleRate, channels: 1, interleaved: true)
             
-            inputNode.installTap(onBus: 0,
+            inputNode.installTap(onBus: self.bus,
                                  bufferSize: UInt32(formatInput.sampleRate / 10),
                                  format: formatPcm) { buffer, time in
                     self.processingQueue.async {
@@ -110,6 +117,8 @@ class Vosk: RCTEventEmitter {
                             }
                         }
                     }
+                
+                //the one tap can just send multiple events DUH!!!! you wilil need multiple recogniszers not taps!!!
             }
             
             // Start the stream of audio data.
@@ -146,7 +155,7 @@ class Vosk: RCTEventEmitter {
     
     /// Do internal cleanup on stop recognition
     func stopInternal(withoutEvents: Bool) {
-        inputNode.removeTap(onBus: 0)
+        inputNode.removeTap(onBus: self.bus)
         if (audioEngine.isRunning) {
             audioEngine.stop()
             if (hasListener && !withoutEvents) {
@@ -175,8 +184,5 @@ class Vosk: RCTEventEmitter {
             return (String(validatingUTF8: res!), endOfSpeech == 1);
     }
     
-    @objc func run(_ timer: AnyObject) {
-          print("Do your remaining stuff here...")
 
-    }
 }

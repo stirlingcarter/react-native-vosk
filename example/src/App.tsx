@@ -6,24 +6,40 @@ import Vosk from 'react-native-vosk';
 const DIALOGUE_BUFFER = 5;
 
 export default function App() {
-  const [ready, setReady] = useState<Boolean>(true);
-  const [result, setResult] = useState<Array<String> | undefined>();
+  const [ready1, setReady1] = useState<Boolean>(true);
+  const [ready2, setReady2] = useState<Boolean>(true);
 
-  const vosk = new Vosk();
+  const [result1, setResult1] = useState<Array<String> | undefined>();
+  const [result2, setResult2] = useState<Array<String> | undefined>();
+
+  const vosk1 = new Vosk();
+  const vosk2 = new Vosk();
+
 
   useEffect(() => {
-    vosk
+    vosk1
       // .loadModel('model-fr-fr')
-      .loadModel('models/en')
-      .then(() => setReady(true))
+      .loadModel1('models/en')
+      .then(() => setReady1(true))
       .catch((e: any) => console.log(e));
 
-    const resultEvent = vosk.onResult((res) => {
-      console.log('A onResult event has been caught :o ' + res.data);
+    vosk2
+    // .loadModel('model-fr-fr')
+    .loadModel1('models/en')
+    .then(() => setReady2(true))
+    .catch((e: any) => console.log(e));
+
+    const resultEvent1 = vosk1.onResult1((res) => {
+      console.log('Vosk1: ' + res.data);
+    });
+
+    const resultEvent2 = vosk2.onResult2((res) => {
+      console.log('Vosk2: ' + res.data);
     });
 
     return () => {
-      resultEvent.remove();
+      resultEvent1.remove();
+      resultEvent2.remove();
     };
   }, []);
 
@@ -32,27 +48,50 @@ export default function App() {
   const record = () => {
     console.log('Starting recognition...');
 
-    setReady(false);
+    setReady1(false);
+    setReady2(false);
 
-    vosk
+
+    vosk1
       .start(grammar)
       .then((res: any) => {
-        console.log('Result is: ' + res);
-        setResult(old => old != null ? 
+        console.log('1 is: ' + res);
+        setResult1(old => old != null ? 
           (old.length > DIALOGUE_BUFFER ? 
             old.slice(1).concat([res]) : 
             old.concat([res])
             ) : 
           [res]);
-          console.log("T")
+          console.log("ONE")
         record();
       })
       .catch((e: any) => {
         console.log('Error: ' + e);
       })
       .finally(() => {
-        setReady(true);
+        setReady1(true);
       });
+
+    vosk2
+    .start(grammar)
+    .then((res: any) => {
+      console.log('2 is: ' + res);
+      setResult2(old => old != null ? 
+        (old.length > DIALOGUE_BUFFER ? 
+          old.slice(1).concat([res]) : 
+          old.concat([res])
+          ) : 
+        [res]);
+        console.log("TWO")
+
+      // record();
+    })
+    .catch((e: any) => {
+      console.log('Error: ' + e);
+    })
+    .finally(() => {
+      setReady2(true);
+    });
   };
 
   return (
@@ -60,11 +99,18 @@ export default function App() {
       <Button
         onPress={record}
         title="Record"
-        disabled={!ready}
+        disabled={!ready1 || !ready2}
         color="#841584"
       />
       <Text>Recognized word:</Text>
-      <Text>{result == undefined ? "placeholder" : result.map((result) =>
+
+      <Text>
+        {result1 == undefined ? "placeholder" : result1.map((result) =>
+        <Text>{result == "" ? "\n" : "Stir: " +result+"\n"}</Text>
+      )}
+      </Text>
+
+<Text>{result2 == undefined ? "placeholder" : result2.map((result) =>
         <Text>{result == "" ? "\n" : "Stir: " +result+"\n"}</Text>
       )}</Text>
     </View>

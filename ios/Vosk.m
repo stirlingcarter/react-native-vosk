@@ -9,6 +9,8 @@ RCT_EXTERN_METHOD(loadModel:(NSString *)name
 
 RCT_EXTERN_METHOD(start:(NSArray)grammar)
 
+RCT_EXTERN_METHOD(withBus:(int)bus)
+
 RCT_EXTERN_METHOD(stop)
 
 + (BOOL)requiresMainQueueSetup

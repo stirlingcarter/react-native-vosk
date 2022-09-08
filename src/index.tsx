@@ -13,7 +13,7 @@ const LINKING_ERROR =
   '- You rebuilt the app after installing the package\n' +
   '- You are not using Expo managed workflow\n';
 
-const VoskModule = NativeModules.Vosk
+const VoskModule1 = NativeModules.Vosk
   ? NativeModules.Vosk
   : new Proxy(
       {},
@@ -24,6 +24,19 @@ const VoskModule = NativeModules.Vosk
       }
     );
 
+  
+
+// const VoskModule2 = NativeModules.Vosk
+//   ? NativeModules.Vosk
+//   : new Proxy(
+//       {},
+//       {
+//         get() {
+//           throw new Error(LINKING_ERROR);
+//         },
+//       }
+//     );
+
 type VoskEvent = {
   /**
    * Event datas
@@ -31,11 +44,13 @@ type VoskEvent = {
   data: string;
 }
 
-const eventEmitter = new NativeEventEmitter(VoskModule);
+const eventEmitter1 = new NativeEventEmitter(VoskModule1);
+const eventEmitter2 = new NativeEventEmitter(VoskModule1);
 
 export default class Vosk {
   // Public functions
-  loadModel = (path: string) => VoskModule.loadModel(path);
+  loadModel1 = (path: string) => VoskModule1.loadModel(path);
+  // loadModel2 = (path: string) => VoskModule2.loadModel(path);
 
   currentRegisteredEvents: EmitterSubscription[] = [];
 
@@ -48,13 +63,23 @@ export default class Vosk {
           if (!granted) return reject('Audio record permission denied');
 
           // Setup events
-          this.currentRegisteredEvents.push(eventEmitter.addListener('onResult', (e: VoskEvent) => resolve(e.data)));
-          this.currentRegisteredEvents.push(eventEmitter.addListener('onFinalResult', (e: VoskEvent) => resolve(e.data)));
-          this.currentRegisteredEvents.push(eventEmitter.addListener('onError', (e: VoskEvent) => reject(e.data)));
-          this.currentRegisteredEvents.push(eventEmitter.addListener('onTimeout', () => reject('timeout')));
+          this.currentRegisteredEvents.push(eventEmitter1.addListener('onResult', (e: VoskEvent) => resolve(e.data)));
+          this.currentRegisteredEvents.push(eventEmitter1.addListener('onFinalResult', (e: VoskEvent) => resolve(e.data)));
+          this.currentRegisteredEvents.push(eventEmitter1.addListener('onError', (e: VoskEvent) => reject(e.data)));
+          this.currentRegisteredEvents.push(eventEmitter1.addListener('onTimeout', () => reject('timeout')));
 
-          // Start recognition
-          VoskModule.start([]);
+          this.currentRegisteredEvents.push(eventEmitter2.addListener('onResult', (e: VoskEvent) => resolve(e.data)));
+          this.currentRegisteredEvents.push(eventEmitter2.addListener('onFinalResult', (e: VoskEvent) => resolve(e.data)));
+          this.currentRegisteredEvents.push(eventEmitter2.addListener('onError', (e: VoskEvent) => reject(e.data)));
+          this.currentRegisteredEvents.push(eventEmitter2.addListener('onTimeout', () => reject('timeout')));
+
+          let p = new Promise<void>((resolve,reject) => {VoskModule1.withBus(0)}).then(VoskModule1.start([]));
+          // let p2 = new Promise<void>((resolve,reject) => {VoskModule2.withBus(1)}).then(VoskModule2.start([]));
+
+          // // Start recognition
+          // VoskModule1.start([]);
+          // VoskModule2.start([]);
+
           
         })
         .catch((e) => {
@@ -65,25 +90,37 @@ export default class Vosk {
     });
   };
 
-  
-
   stop = () => {
     this.cleanListeners();
-    VoskModule.stop();
+    VoskModule1.stop();
+    // VoskModule2.stop();
   };
 
   // Event listeners builders
-  onResult = (onResult: (e: VoskEvent) => void) : EventSubscription => {
-    return eventEmitter.addListener('onResult', onResult);
+  onResult1 = (onResult: (e: VoskEvent) => void) : EventSubscription => {
+    return eventEmitter1.addListener('onResult', onResult);
   };
-  onFinalResult = (onFinalResult: (e: VoskEvent) => void) : EventSubscription => {
-    return eventEmitter.addListener('onFinalResult', onFinalResult);
+  onFinalResult1 = (onFinalResult: (e: VoskEvent) => void) : EventSubscription => {
+    return eventEmitter1.addListener('onFinalResult', onFinalResult);
   };
-  onError = (onError: (e: VoskEvent) => void) : EventSubscription => {
-    return eventEmitter.addListener('onError', onError);
+  onError1 = (onError: (e: VoskEvent) => void) : EventSubscription => {
+    return eventEmitter1.addListener('onError', onError);
   };
-  onTimeout = (onTimeout: (e: VoskEvent) => void) : EventSubscription => {
-    return eventEmitter.addListener('onTimeout', onTimeout);
+  onTimeout1 = (onTimeout: (e: VoskEvent) => void) : EventSubscription => {
+    return eventEmitter1.addListener('onTimeout', onTimeout);
+  };
+
+  onResult2 = (onResult: (e: VoskEvent) => void) : EventSubscription => {
+    return eventEmitter2.addListener('onResult', onResult);
+  };
+  onFinalResult2 = (onFinalResult: (e: VoskEvent) => void) : EventSubscription => {
+    return eventEmitter2.addListener('onFinalResult', onFinalResult);
+  };
+  onError2 = (onError: (e: VoskEvent) => void) : EventSubscription => {
+    return eventEmitter2.addListener('onError', onError);
+  };
+  onTimeout2 = (onTimeout: (e: VoskEvent) => void) : EventSubscription => {
+    return eventEmitter2.addListener('onTimeout', onTimeout);
   };
 
   // Private functions
